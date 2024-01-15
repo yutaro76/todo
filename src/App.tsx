@@ -1,25 +1,27 @@
 import { useState } from 'react';
-import { FormDialog } from './FormDialog';
-import { ActionButton } from './ActionButton';
-import { SideBar } from './SideBar';
-import { ToolBar } from './ToolBar';
-import { TodoItem } from './TodoItem';
-import GlobalStyles from '@mui/material/GlobalStyles';
 
+import GlobalStyles from '@mui/material/GlobalStyles';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { indigo, pink } from '@mui/material/colors';
+
+import { QR } from './QR';
+import { ToolBar } from './ToolBar';
+import { SideBar } from './SideBar';
+import { TodoItem } from './TodoItem';
+import { FormDialog } from './FormDialog';
+import { ActionButton } from './ActionButton';
 
 const theme = createTheme({
   palette: {
     primary: {
       main: indigo[500],
       light: '#757de8',
-      dark: '#002984'
+      dark: '#002984',
     },
     secondary: {
-      main: indigo[500],
+      main: pink[500],
       light: '#ff6090',
-      dark: '#b0003a'
+      dark: '#b0003a',
     },
   },
 });
@@ -29,12 +31,34 @@ export const App = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [filter, setFilter] = useState<Filter>('all');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [qrOpen, setQrOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const handleToggleQR = () => {
+    setQrOpen((qrOpen) => !qrOpen);
+  };
+
+  const handleToggleDrawer = () => {
+    setDrawerOpen((drawerOpen) => !drawerOpen);
+  };
+
+  const handleToggleDialog = () => {
+    setDialogOpen((dialogOpen) => !dialogOpen);
+    setText('');
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setText(e.target.value);
   };
 
   const handleSubmit = () => {
-    if (!text) return;
+    if (!text) {
+      setDialogOpen((dialogOpen) => !dialogOpen);
+      return;
+    }
 
     const newTodo: Todo = {
       value: text,
@@ -45,10 +69,11 @@ export const App = () => {
 
     setTodos((todos) => [newTodo, ...todos]);
     setText('');
+    setDialogOpen((dialogOpen) => !dialogOpen);
   };
 
   const handleTodo = <K extends keyof Todo, V extends Todo[K]>(
-    id: number, 
+    id: number,
     key: K,
     value: V
   ) => {
@@ -60,6 +85,7 @@ export const App = () => {
           return todo;
         }
       });
+
       return newTodos;
     });
   };
@@ -74,13 +100,21 @@ export const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <GlobalStyles styles={{ body: {margin: 0, padding: 0 } }} />
-      <ToolBar filter={filter} />
-      <SideBar onSort={handleSort} />
+      <GlobalStyles styles={{ body: { margin: 0, padding: 0 } }} />
+      <ToolBar filter={filter} onToggleDrawer={handleToggleDrawer} />
+      <SideBar
+        drawerOpen={drawerOpen}
+        onSort={handleSort}
+        onToggleQR={handleToggleQR}
+        onToggleDrawer={handleToggleDrawer}
+      />
+      <QR open={qrOpen} onClose={handleToggleQR} />
       <FormDialog
         text={text}
+        dialogOpen={dialogOpen}
         onChange={handleChange}
         onSubmit={handleSubmit}
+        onToggleDialog={handleToggleDialog}
       />
       <TodoItem todos={todos} filter={filter} onTodo={handleTodo} />
       <ActionButton todos={todos} onEmpty={handleEmpty} />
