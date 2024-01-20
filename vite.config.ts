@@ -16,7 +16,6 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         theme_color: '#3f51b2',
-        id: '/todo/',
         background_color: '#efeff4',
         icons: [
           {
@@ -36,6 +35,7 @@ export default defineConfig({
             purpose: 'maskable',
           },
         ],
+        id: '/todo/',
       },
     }),
   ],
